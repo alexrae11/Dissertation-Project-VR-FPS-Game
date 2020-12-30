@@ -1,0 +1,36 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Valve.VR;
+
+public class VRWeapon : MonoBehaviour
+{
+    private SteamVR_Controller.Device controller;
+    
+private SteamVR_TrackedObject trackedObject null;
+private weaponPistol = null;
+
+private void Awake()
+{
+    trackedObject = GetComponent<SteamVR_TrackedObject>();
+
+    weaponPistol = GetComponentInChildren<Pistol>();
+}
+
+void Update()
+{
+    // Trigger Value
+    controller = SteamVR_Controller.Input((int)trackedObject.index);
+    
+    if (controller.GetTouchDown(SteamVR_Controller.ButtonMask.Trigger))
+    {
+        // Weapon Fire
+        weaponPistol.Fire();
+    }
+
+    // Set trigger
+    Vector2 triggerValue = controller.GetAxis(EVRButtonId.k_EButton_SteamVR_Trigger);
+
+    // Set rotation
+    weaponPistol.SetTriggerRotation(triggerValue.x);
+}
