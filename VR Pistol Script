@@ -1,0 +1,85 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Pistol : MonoBehaviour
+{
+    public Transform weaponTrigger;
+    public Transform weaponBarrel;
+    public GameObject bulletImpact;
+
+    public readonly int weaponDamage = 10;
+    private int currentAmmo = 0;
+    private List<GameObject> bulletImpacts = null;
+    private readonly int totalMagazineSize = 6;
+
+    private void Awake()
+    {
+        currentAmmo = totalMagazineSize;
+
+        bulletImpacts = CreateBulletImpacts(bulletImpact, totalMagazineSize);
+    }
+    public void SetTriggerRotation(float triggerValue)
+    {
+        float targetX = triggerValue * 20.0f;
+        weaponTrigger.transform.localEulerAngles = new Vector3(targetX, 0, 0);
+    }
+
+    public void Fire()
+    {
+        // Check ammunition
+        if(currentAmmo < 0)
+            currentAmmo = totalMagazineSize;
+
+        // reduce ammo by 1 when shooting
+        currentAmmo--;
+
+        RaycastHit hit;
+        Ray ray = new Ray(weaponBarrel.position, weaponBarrel.forward);
+
+
+        if(Physics.Raycast(ray, out hit))
+        {
+            // Check damage
+            CheckForDamage(hit.collider.gameObject);
+
+            // Place Impact
+            PlaceBulletImpact(bulletImpacts[currentAmmo - 1], hit);
+        }
+    }
+
+    private void CheckForDamage(GameObject hitObject)
+    {
+        if(!hitObject.CompareTag("Target"))
+        return;
+
+        Target target = hitObject.GetComponent<Target>();
+        target.takeDamage(this);
+    }
+
+    private List<GameObject> CreateBulletImpacts(GameObject bulletImpact, int magazineSize)
+    {
+        List<GameObject> newBulletImpacts = new List<GameObject>();
+
+        for(int i = 0; i < magazineSize; i++)
+        {
+            GameObject newBulletImpact = Instantiate(bulletImpact);
+            newBulletImpact.SetActive(false);
+
+            newBulletImpacts.Add(newBulletImpact);
+        }
+
+        return newBulletImpacts;
+    }
+
+    private void PlaceBulletImpact(GameObject bulletImpact, RaycastHit hit)
+    {
+        // Orient
+        bulletImpact.transform.position = hit.point;
+        bulletImpact.transform.rotation = Quaternion.FromToRotation(Vector3.back, hit.normal);
+
+        // Enable
+        bulletImpact.transform.parent = hit.transform;
+        bulletImpact.SetActive(true);
+    }
+}
