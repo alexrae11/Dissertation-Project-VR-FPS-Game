@@ -1,0 +1,10 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class VRTarget : MonoBehaviour
+{
+    public int totalHealth = 0;
+
+    public abstract void Damage(Pistol pistol);
+}
